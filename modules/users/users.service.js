@@ -6,13 +6,22 @@ const findAll = async (prisma) => {
   return users;
 }
 
+const findById = async (prisma, id) => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+  return user;
+}
+
 const findByEmail = async (prisma, email) => {
-  return await prisma.user.findUnique({ where: { email } })
+  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  return user;
 }
 
 const create = async (prisma, data, admin_id) => {
   const { role_id, ...rest } = data;
-  const user = await findByEmail(prisma, data.email.toLowerCase());
+  const user = await findByEmail(prisma, data.email);
   if (user) {
     throw new AppError("User already exists.", 400);
   }
@@ -20,7 +29,7 @@ const create = async (prisma, data, admin_id) => {
   const created = await prisma.user.create({
     data: {
       ...rest,
-      password: hashPassword(rest.password),
+      password: await hashPassword(rest.password),
       email: data.email.toLowerCase(),
       admin: { connect: { id: admin_id } },
       role: { connect: { id: role_id } }
@@ -33,5 +42,6 @@ const create = async (prisma, data, admin_id) => {
 module.exports = {
   findAll,
   findByEmail,
-  create
+  create,
+  findById
 }

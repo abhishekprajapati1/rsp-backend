@@ -47,7 +47,7 @@ const login = async (prisma, data) => {
 
     if (data.role === 'admin') {
         user = await prisma.admin.findUnique({ where: { email: data.email } });
-        user.admin_id = user.id;
+        if (user) user.admin_id = user.id;
     } else {
         user = await prisma.user.findUnique({ where: { email: data.email } });
     }

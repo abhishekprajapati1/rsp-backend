@@ -1,3 +1,4 @@
+const AppError = require("../../../utils/AppError");
 const { login, generateToken, setCookie } = require("../auth.service");
 
 const loginUser = async (req, res) => {
@@ -7,7 +8,7 @@ const loginUser = async (req, res) => {
     try {
         const user = await login(prisma, data);
         if (!user) {
-            return res.status(400).json({ success: false, message: "Invalid credentials" });
+            throw new AppError("Invalid credentials.", 400);
         }
         let token = generateToken({ id: user.id, email: user.email, admin_id: user.admin_id });
 
