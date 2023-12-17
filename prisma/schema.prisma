@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  email       String       @unique
+  name        String
+  password    String
+  created_at  DateTime?    @default(now())
+  updated_at  DateTime?    @updatedAt
+  roles       Role[]
+  permissions Permission[]
+  users       User[]
+  items       Item[]
+  sales       Sale[]
+  purchases   Purchase[]
+}
+
+enum UserStatus {
+  active
+  inactive
+  archived
+}
+
+model User {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  email      String      @unique
+  name       String
+  phone      String
+  status     UserStatus? @default(active)
+  password   String
+  address    Address?
+  role       Role?       @relation(fields: [role_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  role_id    String?     @db.ObjectId
+  created_at DateTime?   @default(now())
+  updated_at DateTime?   @updatedAt
+  admin      Admin       @relation(fields: [admin_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  admin_id   String      @db.ObjectId
+  sales      Sale[]
+  purchases  Purchase[]
+}
+
+model Address {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  address    String
+  state      String
+  city       String
+  pincode    String
+  country    String
+  user       User?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id    String?   @unique @db.ObjectId
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+}
+
+model Role {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  title          String       @unique
+  users          User[]
+  created_at     DateTime?    @default(now())
+  updated_at     DateTime?    @updatedAt
+  admin          Admin        @relation(fields: [admin_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  admin_id       String       @db.ObjectId
+  permissions    Permission[] @relation(fields: [permission_ids], references: [id])
+  permission_ids String[]     @db.ObjectId
+}
+
+enum AccessTypes {
+  create
+  read
+  update
+  delete
+}
+
+model Permission {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  group      String
+  access     AccessTypes
+  admin      Admin       @relation(fields: [admin_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  admin_id   String      @db.ObjectId
+  created_at DateTime?   @default(now())
+  updated_at DateTime?   @updatedAt
+  roles      Role[]      @relation(fields: [role_ids], references: [id])
+  role_ids   String[]    @db.ObjectId
+}
+
+model Item {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String @unique
+  price    Int
+  admin    Admin  @relation(fields: [admin_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  admin_id String @db.ObjectId
+  sales    Sale[]
+}
+
+enum PaymentModes {
+  online
+  cash
+}
+
+model Sale {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  date         DateTime     @default(now())
+  quantity     Int
+  total_price  Float
+  payment_mode PaymentModes
+  is_updated   Boolean?     @default(false)
+  item         Item?        @relation(fields: [item_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  item_id      String?      @db.ObjectId
+  updated_at   DateTime     @updatedAt
+  user         User?        @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  user_id      String?      @db.ObjectId
+  admin        Admin        @relation(fields: [admin_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  admin_id     String       @db.ObjectId
+}
+
+model Purchase {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  date       DateTime @default(now())
+  price      Float
+  amount     String
+  name       String
+  is_updated Boolean? @default(false)
+  updated_at DateTime @updatedAt
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  user_id    String?  @db.ObjectId
+  admin      Admin    @relation(fields: [admin_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  admin_id   String   @db.ObjectId
+}
