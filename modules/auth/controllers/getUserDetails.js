@@ -11,9 +11,7 @@ const getUserDetails = async (req, res) => {
             data = admin;
             if (admin) data.role = 'admin';
         } else {
-            let staff = await userService.findById(prisma, id);
-            data = staff;
-            if (staff) data.role = 'staff';
+            data = await userService.findById(prisma, id);
         }
 
         if (!data) {

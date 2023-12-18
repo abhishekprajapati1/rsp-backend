@@ -2,6 +2,7 @@ const { verifyToken } = require("../modules/auth/auth.service");
 
 async function authenticate(req, res, next) {
     const token = req?.cookies?.token || req.headers["authorization"];
+    
     if (!token)
         return res
             .status(400)

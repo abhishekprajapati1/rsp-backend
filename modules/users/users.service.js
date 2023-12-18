@@ -7,7 +7,7 @@ const findAll = async (prisma) => {
 }
 
 const findById = async (prisma, id) => {
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({ where: { id }, include: { role: true } });
   if (!user) {
     throw new AppError("User not found", 404);
   }
