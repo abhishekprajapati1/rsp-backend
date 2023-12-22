@@ -1,7 +1,14 @@
 const AppError = require("../../utils/AppError");
 
 const findAll = async (prisma) => {
-    return await prisma.sale.findMany();
+    return await prisma.sale.findMany({
+        orderBy: {
+            date: 'desc'
+        },
+        include: {
+            item: true,
+        }
+    });
 }
 
 const findById = async (prisma, id) => {

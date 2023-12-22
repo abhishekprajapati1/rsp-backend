@@ -18,12 +18,8 @@ const generateToken = (payload) => {
 }
 
 const verifyToken = (token) => {
-    try {
-        const decoded = jwt.verify(token, process.env.APP_SECRET_KEY);
-        return decoded;
-    } catch (error) {
-        return null;
-    }
+    const decoded = jwt.verify(token, process.env.APP_SECRET_KEY);
+    return decoded;
 }
 
 const setCookie = (response, { data, age, name }) => {
