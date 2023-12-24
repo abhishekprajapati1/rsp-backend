@@ -17,7 +17,6 @@ async function main() {
 
 
     delete admin.password;
-    console.log("see this", admin);
 }
 
 

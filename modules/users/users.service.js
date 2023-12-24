@@ -1,8 +1,15 @@
 const AppError = require("../../utils/AppError");
 const { hashPassword } = require("../auth/auth.service");
 
-const findAll = async (prisma) => {
-  const users = await prisma.user.findMany();
+const findAll = async (prisma, logged_user_id) => {
+  const users = await prisma.user.findMany({
+    where: {
+      id: {
+        not: logged_user_id
+      }
+    }
+  });
+
   return users;
 }
 

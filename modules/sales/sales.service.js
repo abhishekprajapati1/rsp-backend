@@ -7,16 +7,17 @@ const findAll = async (prisma, role) => {
     const today = dayjs().startOf('day');
     const tomorrow = dayjs().add(1, 'day').startOf('day');
 
-
     return await prisma.sale.findMany({
         orderBy: {
             date: 'desc'
         },
         where: {
-            date: {
-                gte: today.toDate(),
-                lt: tomorrow.toDate()
-            }
+            ...(!showAll && {
+                date: {
+                    gte: today.toDate(),
+                    lt: tomorrow.toDate()
+                }
+            })
         },
         include: {
             item: true,

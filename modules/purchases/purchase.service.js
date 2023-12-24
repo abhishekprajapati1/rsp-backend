@@ -14,10 +14,12 @@ const findAll = async (prisma, role) => {
             date: 'desc'
         },
         where: {
-            date: {
-                gte: today.toDate(),
-                lt: tomorrow.toDate()
-            }
+            ...(!showAll && {
+                date: {
+                    gte: today.toDate(),
+                    lt: tomorrow.toDate()
+                }
+            })
         },
         include: {
             //include user that is not null i.e user_id is not null
