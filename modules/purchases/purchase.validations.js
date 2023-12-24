@@ -3,7 +3,8 @@ const Joi = require("joi");
 const createPurchaseSchema = Joi.object({
     name: Joi.string().required(),
     price: Joi.number().min(1).required(),
-    amount: Joi.string().required(),
+    quantity: Joi.string().required(),
+    payment_mode: Joi.string().valid("cash", "online").required()
 })
 
 const updatePurchaseSchema = Joi.object({

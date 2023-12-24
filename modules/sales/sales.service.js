@@ -1,12 +1,27 @@
+const dayjs = require("dayjs");
 const AppError = require("../../utils/AppError");
 
-const findAll = async (prisma) => {
+const findAll = async (prisma, role) => {
+    const showAll = role === "employee" ? false : true;
+
+    const today = dayjs().startOf('day');
+    const tomorrow = dayjs().add(1, 'day').startOf('day');
+
+
     return await prisma.sale.findMany({
         orderBy: {
             date: 'desc'
         },
+        where: {
+            date: {
+                gte: today.toDate(),
+                lt: tomorrow.toDate()
+            }
+        },
         include: {
             item: true,
+            user: { select: { name: true, role: { select: { title: true } } } },
+            admin: { select: { name: true } },
         }
     });
 }

@@ -42,10 +42,13 @@ const login = async (prisma, data) => {
     let user = null;
 
     if (data.role === 'admin') {
-        user = await prisma.admin.findUnique({ where: { email: data.email } });
-        if (user) user.admin_id = user.id;
+        user = await prisma.admin.findUnique({ where: { phone: data.phone } });
+        if (user) {
+            user.admin_id = user.id;
+            user.role = "admin";
+        }
     } else {
-        user = await prisma.user.findUnique({ where: { email: data.email } });
+        user = await prisma.user.findUnique({ where: { phone: data.phone }, include: { role: { select: { title: true } } } });
     }
 
     if (!user) {
@@ -63,6 +66,69 @@ const login = async (prisma, data) => {
     return user;
 }
 
+const updatePassword = async (prisma, data, id, role) => {
+    if (role === "admin") {
+        const admin = await prisma.admin.findUnique({ where: { id }, select: { password: true } })
+        if (!admin) {
+            throw new AppError("Invalid user.", 400);
+        }
+
+        let isCorrectPassword = await comparePasswords(data.current_password, admin.password);
+        if (!isCorrectPassword) {
+            throw new AppError("Current password is incorrect.")
+        }
+
+        await prisma.admin.update({
+            where: { id },
+            data: {
+                password: await hashPassword(data.new_password),
+            }
+        })
+    } else {
+        const user = await prisma.user.findUnique({ where: { id }, select: { password: true } })
+        if (!user) {
+            throw new AppError("Invalid user", 400)
+        }
+
+        let isCorrectPassword = await comparePasswords(data.current_password, user.password);
+        if (!isCorrectPassword) {
+            throw new AppError("Current password is incorrect", 400);
+        }
+
+        await prisma.user.update({
+            where: { id },
+            data: {
+                password: await hashPassword(data.new_password),
+            }
+        })
+    }
+}
+
+
+const updateDetails = async (prisma, data, id, role) => {
+    if (role === "admin") {
+        const admin = await prisma.admin.findUnique({ where: { id }, select: { password: true } })
+        if (!admin) {
+            throw new AppError("Invalid user.", 400);
+        }
+
+        await prisma.admin.update({
+            where: { id },
+            data
+        })
+    } else {
+        const user = await prisma.user.findUnique({ where: { id }, select: { password: true } })
+        if (!user) {
+            throw new AppError("Invalid user", 400)
+        }
+
+        await prisma.user.update({
+            where: { id },
+            data
+        })
+    }
+}
+
 module.exports = {
     login,
     hashPassword,
@@ -70,5 +136,7 @@ module.exports = {
     generateToken,
     verifyToken,
     setCookie,
-    removeCookie
+    removeCookie,
+    updatePassword,
+    updateDetails
 }

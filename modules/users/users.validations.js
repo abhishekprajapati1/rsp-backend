@@ -3,7 +3,6 @@ const Joi = require("joi");
 
 const createUserSchema = Joi.object({
     name: Joi.string().trim().required(),
-    email: Joi.string().trim().email().required(),
     phone: Joi.string().trim().length(10).required(),
     role_id: Joi.string().hex().length(24).required().messages({
         "string.hex": "The 'role_id' field must be a valid id.",

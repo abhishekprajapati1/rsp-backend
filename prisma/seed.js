@@ -5,11 +5,11 @@ const prisma = new PrismaClient();
 
 async function main() {
 
-    const password = await bcrypt.hash("Abhishek@123", 10);
+    const password = await bcrypt.hash("Admin@123", 10);
 
     const admin = await prisma.admin.create({
         data: {
-            email: "admin@gmail.com",
+            phone: "8850593776",
             name: "Abhishek Prajapati",
             password
         }
